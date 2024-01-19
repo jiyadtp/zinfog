@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+    <div class="col-lg-12 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Orders</h4>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>
+                    Customer
+                  </th>
+                  <th>
+                    Product
+                  </th>
+                  <th>
+                    Total Count
+                  </th>
+                  <th>
+                    Address
+                  </th>
+                  <th>
+                    Status
+                  </th>
+                  <th>
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for i in data %}
+                <tr>
+                  <td>
+                      {{i.customer_id.name}}
+                  </td>
+                  <td>
+                      {{i.product_id.name}}
+                  </td>
+                  <td>
+                      {{i.total_count}}
+                  </td>
+                  <td>
+                      {{i.address}}
+                  </td>
+                  <td>
+                      {% if i.order_status == "Pending" %}
+                      <button style="cursor:inherit;" type="button" class="btn btn-danger btn-rounded btn-fw">{{i.order_status}}</button>
+                      {% endif %}
+                      {% if i.order_status == "Approved" %}
+                      <button style="cursor:inherit;" type="button" class="btn btn-primary btn-rounded btn-fw">{{i.order_status}}</button>
+                      {% endif %}
+                      {% if i.order_status == "Shipped" %}
+                      <button style="cursor:inherit;" type="button" class="btn btn-warning btn-rounded btn-fw">{{i.order_status}}</button>
+                      {% endif %}
+                      {% if i.order_status == "Delivered" %}
+                       <button style="cursor:inherit;" type="button" class="btn btn-success btn-rounded btn-fw">{{i.order_status}}</button>
+                      {% endif %}
+                  </td>
+                  <td>
+                    <button type="button" onclick="change_status('{{i.id}}')" class="btn btn-dark btn-rounded btn-fw">Change Status</button>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+             <button style="float:right;display:none;" type="button" class="btn btn-success btn-md" id="buy_now_button" data-toggle="modal" data-target="#myModal">Buy Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div id="change_status_div"></div>
+
+<script>
+function change_status(id){
+    var url ="change-status";
+            $.ajax({
+            url: url,
+            data: {
+              'id': id
+            },
+            success: function (data) {
+                $("#change_status_div").html(data);
+                $('#change_status_modal').modal('show');
+            }
+          });
+}
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {% if messages %}
+    <script>
+        {% for message in messages %}
+
+
+        var toastMixin = Swal.mixin({
+        toast: true,
+        icon: '{{message.tags}}',
+        title: 'General Title',
+        animation: false,
+        position: 'top-right',
+        showConfirmButton: false,
+        timer: 5000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+        });
+        toastMixin.fire({
+        animation: true,
+        title: "{{message}}"
+        });
+        {% endfor %}
+
+    </script>
+    {% endif %}
+
+{% endblock %}

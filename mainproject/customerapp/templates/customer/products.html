@@ -1,0 +1,123 @@
+{% extends 'customer/base.html' %}
+{% load static %}
+{% block content %}
+    <form action="add-to-cart" method="post" class="login-form" name="submit-form">
+    {% csrf_token %}
+    </form>
+    <div class="row">
+    {% for i in data %}
+      <div class="col-md-4 mb-4">
+        <div class="card">
+          {% if i.product_image %}
+          <img class="card-img-top" src="{{ i.product_image.url }}" alt="{{ product.name }}">
+          {% else %}
+          <img class="card-img-top" src="{% static 'no_image.jpg' %}" alt="{{ product.name }}">
+          {% endif %}
+          <div class="card-body">
+            <h5 class="card-title">{{ i.name }}</h5>
+            <div class="input-group mb-3">
+              <div class="input-group-prepend">
+                <button class="btn btn-outline-secondary" type="button" onclick="decrementCount('{{i.id}}')" id="decreaseBtn{{ i.id }}">-</button>
+              </div>
+              <input type="text" class="form-control text-center" value="0" id="count{{ i.id }}" readonly>
+              <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button" onclick="incrementCount('{{i.id}}')" id="increaseBtn{{ i.id }}">+</button>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="addToCart('{{i.id}}')">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+{% if messages %}
+    <script>
+        {% for message in messages %}
+
+
+        var toastMixin = Swal.mixin({
+        toast: true,
+        icon: '{{message.tags}}',
+        title: 'General Title',
+        animation: false,
+        position: 'top-right',
+        showConfirmButton: false,
+        timer: 5000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+        });
+        toastMixin.fire({
+        animation: true,
+        title: "{{message}}"
+        });
+        {% endfor %}
+
+    </script>
+    {% endif %}
+
+<script>
+
+
+    function incrementCount(productId) {
+      var countInput = document.getElementById('count' + productId);
+      var count = parseInt(countInput.value);
+      count++;
+      countInput.value = count;
+    }
+
+    function decrementCount(productId) {
+      var countInput = document.getElementById('count' + productId);
+      var count = parseInt(countInput.value);
+      if (count > 0) {
+        count--;
+        countInput.value = count;
+      }
+    }
+
+    function addToCart(productId) {
+      var countInput = document.getElementById('count' + productId);
+      var count = parseInt(countInput.value, 10);
+      $.ajax({
+          url: "add-to-cart",
+          data: {
+              productId : productId,
+              count : count,
+          },
+          success: function (data) {
+              status = data['status']
+              message = data['message']
+              if(status == "error"){
+                  var toastMixin = Swal.mixin({
+                      toast: true,
+                      icon: 'error',
+                      title: 'General Title',
+                      animation: false,
+                      position: 'top-right',
+                      showConfirmButton: false,
+                      timer: 1000,
+                      timerProgressBar: true,
+                      didOpen: (toast) => {
+                          toast.addEventListener('mouseenter', Swal.stopTimer)
+                          toast.addEventListener('mouseleave', Swal.resumeTimer)
+                      }
+                  });
+                  toastMixin.fire({
+                  animation: true,
+                  title: "something went wrong"
+                  });
+              }
+              else{
+                  document.forms["submit-form"].submit();
+              }
+          }
+      });
+    }
+  </script>
+
+
+{% endblock %}

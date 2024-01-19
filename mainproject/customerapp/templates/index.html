@@ -1,0 +1,153 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'index/fonts/icomoon/style.css' %}">
+
+    <link rel="stylesheet" href="{% static 'index/css/owl.carousel.min.css' %}">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'index/css/bootstrap.min.css' %}">
+
+    <!-- Style -->
+    <link rel="stylesheet" href="{% static 'index/css/style.css' %}">
+
+    <title>Index</title>
+  </head>
+  <body>
+
+
+  <div class="d-md-flex half">
+    <div class="bg" style="background-image: url('{% static 'index/images/bg_1.jpg' %}');"></div>
+    <div class="contents">
+
+      <div class="container">
+        <div class="row align-items-center justify-content-center">
+          <div class="col-md-12">
+            <div class="form-block mx-auto">
+              <div class="text-center mb-5">
+                <h3 class="text-uppercase"><strong>Login</strong></h3>
+              </div>
+              <form action="" method="post" name="loginform">
+                {% csrf_token %}
+                <div class="form-group first">
+                  <label for="username">Email</label>
+                  <input type="text" name="email" class="form-control" placeholder="your-email@gmail.com" id="username">
+                </div>
+                <div class="form-group last mb-3">
+                  <label for="password">Password</label>
+                  <input type="password" name="password" class="form-control" placeholder="Your Password" id="password">
+                </div>
+
+<!--                <div class="d-sm-flex mb-5 align-items-center">-->
+<!--                  <label class="control control&#45;&#45;checkbox mb-3 mb-sm-0"><span class="caption">Remember me</span>-->
+<!--                    <input type="checkbox" checked="checked"/>-->
+<!--                    <div class="control__indicator"></div>-->
+<!--                  </label>-->
+<!--                  <span class="ml-auto"><a href="#" class="forgot-pass">New User</a></span>-->
+<!--                </div>-->
+
+                <input type="submit" onclick="login_submit()" value="Log In" class="btn btn-block py-2 btn-primary">
+
+                <span class="text-center my-3 d-block">or</span>
+
+
+                <div class="">
+<!--                <a href="#" class="btn btn-block py-2 btn-facebook">-->
+<!--                  <span class="icon-facebook mr-3"></span> Sign Up-->
+<!--                </a>-->
+                <a href="sign-up" class="btn btn-block py-2 btn-google"> Sign Up</a>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+
+
+    <script src="{% static 'index/js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'index/js/popper.min.js' %}"></script>
+    <script src="{% static 'index/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'index/js/main.js' %}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {% if messages %}
+    <script>
+        {% for message in messages %}
+
+
+        var toastMixin = Swal.mixin({
+        toast: true,
+        icon: '{{message.tags}}',
+        title: 'General Title',
+        animation: false,
+        position: 'top-right',
+        showConfirmButton: false,
+        timer: 5000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+        });
+        toastMixin.fire({
+        animation: true,
+        title: "{{message}}"
+        });
+        {% endfor %}
+
+    </script>
+    {% endif %}
+
+    <script>
+        function login_submit(){
+            event.preventDefault()
+			$.ajax({
+				url: "login-check-customer",
+				data: {
+					email : $("#username").val(),
+					password : $("#password").val(),
+				},
+				success: function (data) {
+					status = data['status']
+					message = data['message']
+					if(status == "error"){
+						var toastMixin = Swal.mixin({
+							toast: true,
+							icon: 'error',
+							title: 'General Title',
+							animation: false,
+							position: 'top-right',
+							showConfirmButton: false,
+							timer: 1000,
+							timerProgressBar: true,
+							didOpen: (toast) => {
+								toast.addEventListener('mouseenter', Swal.stopTimer)
+								toast.addEventListener('mouseleave', Swal.resumeTimer)
+							}
+						});
+						toastMixin.fire({
+						animation: true,
+						title: message
+						});
+					}
+					else{
+						document.forms["loginform"].submit();
+					}
+				}
+			});
+        }
+    </script>
+
+  </body>
+</html>

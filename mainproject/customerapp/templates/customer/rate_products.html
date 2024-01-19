@@ -1,0 +1,64 @@
+  <style>
+    .star-rating {
+  display: inline-block;
+  font-size: 0; /* Remove the white space between inline-block elements */
+}
+
+/* Individual star styles */
+.star {
+  display: inline-block;
+  margin: 0 2px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #ccc; /* Default star color */
+}
+
+/* Selected (filled) star */
+.selected {
+  color: #ffcc00; /* Selected star color */
+}
+</style>
+
+    <div class="modal fade" id="rate_product_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Rate Product</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form action="rate-product" method="post" class="login-form" id="cart_form">
+          {% csrf_token %}
+              <input type="hidden" value="{{data.id}}" name="product_id">
+              <div class="modal-body">
+                <div class="star-rating">
+                  <span class="star {% if rating >= 1 %} selected {% endif %}">&#9733;</span>
+                  <span class="star {% if rating >= 2 %} selected {% endif %}">&#9733;</span>
+                  <span class="star {% if rating >= 3 %} selected {% endif %}">&#9733;</span>
+                  <span class="star {% if rating >= 4 %} selected {% endif %}">&#9733;</span>
+                  <span class="star {% if rating >= 5 %} selected {% endif %}">&#9733;</span>
+                </div>
+              </div>
+            <input type="hidden" id="total-stars" value="" name="total_rating">
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Rate Product</button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+  <script>
+    $(document).ready(function () {
+      $('.star').on('click', function () {
+        $(this).toggleClass('selected'); // Toggle the selected class on the clicked star
+
+        // Update the total stars count
+        var totalStars = $('.star.selected').length;
+        $('#total-stars').val(totalStars);
+      });
+    });
+  </script>

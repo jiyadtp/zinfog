@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+  <style>
+    .star-rating {
+  display: inline-block;
+  font-size: 0; /* Remove the white space between inline-block elements */
+}
+
+/* Individual star styles */
+.star {
+  display: inline-block;
+  margin: 0 2px;
+  font-size: 24px;
+  cursor: pointer;
+  color: #ccc; /* Default star color */
+}
+
+/* Selected (filled) star */
+.selected {
+  color: #ffcc00; /* Selected star color */
+}
+</style>
+
+    <div class="col-lg-12 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-title">Products</h4>
+            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#myModal">Create</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>
+                    Product Image
+                  </th>
+                  <th>
+                    Product Name
+                  </th>
+                  <th>
+                    Average Rating
+                  </th>
+                  <th>
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for i in data %}
+                <tr>
+                  <td class="py-1">
+                    {% if i.product_image %}
+                    <img src="./media/{{i.product_image}}" alt="image"/>
+                    {% endif %}
+                  </td>
+                  <td>
+                      {{i.name}}
+                  </td>
+                  <td>
+                    <div class="star-rating">
+                      <span class="star {% if i.avg_rating >= 1 %} selected {% endif %}">&#9733;</span>
+                      <span class="star {% if i.avg_rating >= 2 %} selected {% endif %}">&#9733;</span>
+                      <span class="star {% if i.avg_rating >= 3 %} selected {% endif %}">&#9733;</span>
+                      <span class="star {% if i.avg_rating >= 4 %} selected {% endif %}">&#9733;</span>
+                      <span class="star {% if i.avg_rating >= 5 %} selected {% endif %}">&#9733;</span>
+                    </div>
+                  </td>
+                  <td>
+                    <!-- Edit button with icon -->
+                    <button type="button" class="btn btn-success btn-sm" onclick="edit_product('{{i.id}}')">
+                      <i class="mdi mdi-pencil"></i> Edit
+                    </button>
+
+                    <!-- Delete button with icon -->
+                    <button type="button" class="btn btn-danger btn-sm" onclick="return confirm('Are You Sure to Delete ?')">
+                      <a href="delete-product/{{i.id}}" style="color:white;"><i class="fas fa-trash-alt"></i> Delete</a>
+                    </button>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Create Product</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form action="" method="post" class="login-form" id="product_form">
+          {% csrf_token %}
+              <div class="modal-body">
+                <div class="form-group">
+                  <label for="name">Product Name</label>
+                  <input type="text" name="product_name" class="form-control" id="name" placeholder="Product Name">
+                </div>
+                <div class="form-group">
+                  <label>Image upload</label>
+                  <input type="file" name="product_image" class="file-upload-default">
+                  <div class="input-group col-xs-12">
+                    <input type="text" class="form-control file-upload-info" disabled placeholder="Upload Image">
+                    <span class="input-group-append">
+                      <button class="file-upload-browse btn btn-primary" type="button">Upload</button>
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" onclick="product_submit()">Save changes</button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  <div id="edit_product_div"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    {% if messages %}
+    <script>
+        {% for message in messages %}
+
+
+        var toastMixin = Swal.mixin({
+        toast: true,
+        icon: '{{message.tags}}',
+        title: 'General Title',
+        animation: false,
+        position: 'top-right',
+        showConfirmButton: false,
+        timer: 5000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+        });
+        toastMixin.fire({
+        animation: true,
+        title: "{{message}}"
+        });
+        {% endfor %}
+
+    </script>
+    {% endif %}
+
+    <script>
+        function product_submit(){
+            event.preventDefault()
+            var form_data = new FormData($('#product_form')[0]);
+            $.ajax({
+                type: 'POST',
+                url: "create-product",
+                data: form_data,
+                processData: false,
+                contentType: false,
+                success: function(data)
+                {
+                    status = data['status']
+                    message = data['message']
+                    if (status == "success"){
+                        document.getElementById('product_form').submit();
+                    }
+                    else{
+                        var toastMixin = Swal.mixin({
+                        toast: true,
+                        icon: status,
+                        title: 'General Title',
+                        animation: false,
+                        position: 'top-right',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                        });
+                        toastMixin.fire({
+                        animation: true,
+                        title: message
+                        });
+                    }
+
+                }
+            })
+
+        }
+    </script>
+
+    <script>
+        function edit_product(id){
+            var url ="edit-product";
+            $.ajax({
+            url: url,
+            data: {
+              'id': id
+            },
+            success: function (data) {
+                $("#edit_product_div").html(data);
+                $('#edit_product_modal').modal('show');
+            }
+          });
+        }
+    </script>
+
+{% endblock %}

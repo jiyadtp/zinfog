@@ -1,0 +1,107 @@
+{% load static %}
+<div class="modal fade" id="edit_product_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Edit Product</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form action="" method="post" class="login-form" id="product_edit_form">
+          {% csrf_token %}
+            <input type="hidden" value="{{data.id}}" name="product_id">
+              <div class="modal-body">
+                <div class="form-group">
+                  <label for="name">Product Name</label>
+                  <input type="text" value="{{data.name}}" name="product_name" class="form-control" id="name" placeholder="Product Name">
+                </div>
+                <div class="form-group">
+                  <label>Image upload</label>
+
+                  {% if data.product_image %}
+                  <input type="hidden" value="no" name="image_change" id="image_change">
+                  <div class="input-group col-xs-12" id="image_present">
+                  <!-- Edit button with icon -->
+                    <button type="button" class="btn btn-success btn-sm" onclick="edit_product_image()">
+                      <i class="mdi mdi-pencil"></i> Edit Current Image
+                    </button>
+
+                  </div>
+                  {% endif %}
+                  <input type="file" name="product_image" class="file-upload-default">
+                  <div class="input-group col-xs-12" id="image_not_present" {% if data.product_image %} style="display:none; {% endif %}">
+                    <input type="text" class="form-control file-upload-info" disabled placeholder="Upload Image">
+                    <span class="input-group-append">
+                      <button class="file-upload-browse btn btn-primary" type="button">Upload</button>
+                    </span>
+                  </div>
+
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" onclick="product_edit_submit()">Save changes</button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+<script src="{% static 'dashboard/js/file-upload.js' %}"></script>
+<script>
+    function edit_product_image(){
+        $('#image_present').hide()
+        $('#image_not_present').show()
+        $('#image_change').val("yes")
+    }
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+
+    <script>
+        function product_edit_submit(){
+            event.preventDefault()
+            var form_data = new FormData($('#product_edit_form')[0]);
+            $.ajax({
+                type: 'POST',
+                url: "edit-product-action",
+                data: form_data,
+                processData: false,
+                contentType: false,
+                success: function(data)
+                {
+                    status = data['status']
+                    message = data['message']
+                    if (status == "success"){
+                        document.getElementById('product_edit_form').submit();
+                    }
+                    else{
+                        var toastMixin = Swal.mixin({
+                        toast: true,
+                        icon: status,
+                        title: 'General Title',
+                        animation: false,
+                        position: 'top-right',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                        });
+                        toastMixin.fire({
+                        animation: true,
+                        title: message
+                        });
+                    }
+
+                }
+            })
+
+        }
+    </script>

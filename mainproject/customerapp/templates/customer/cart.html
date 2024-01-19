@@ -1,0 +1,212 @@
+{% extends 'customer/base.html' %}
+{% load static %}
+{% block content %}
+
+    <div class="col-lg-12 grid-margin stretch-card">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Cart Products</h4>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>
+                    Buy
+                  </th>
+                  <th>
+                    Product
+                  </th>
+                  <th>
+                    Total Count
+                  </th>
+                  <th>
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for i in data %}
+                <tr>
+                  <td>
+                      <div class="form-check form-check-flat form-check-primary">
+                      <label class="form-check-label">
+                        <input onclick="checkIfAnyChecked(this)" type="checkbox" value="{{i.id}}" name="order_id" class="order_id form-check-input">
+
+                      </label>
+                    </div>
+                  </td>
+                  <td>
+                      {{i.product_id.name}}
+                  </td>
+                  <td>
+                      {{i.total_count}}
+                  </td>
+                  <td>
+                      <button type="button" class="btn btn-danger btn-sm" onclick="return confirm('Are You Sure to Delete ?')">
+                      <a href="delete-order/{{i.id}}" style="color:white;"><i class="fas fa-trash-alt"></i> Delete</a>
+                    </button>
+                  </td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <button style="float:right;display:none;" type="button" class="btn btn-success btn-md" id="buy_now_button" data-toggle="modal" data-target="#myModal">Buy Now</button>
+        </div>
+      </div>
+    </div>
+
+
+
+<!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Buy Products</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <form action="" method="post" class="login-form" id="cart_form">
+          {% csrf_token %}
+              <div class="modal-body">
+                <div class="form-group">
+                  <label for="address">Address</label>
+                  <textarea onkeyup="uncheck_radio()" class="form-control" id="address" rows="4"></textarea>
+                </div>
+              </div>
+              {% for i in address_details %}
+               <div class="col-sm-4">
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input onclick="add_address(this.value)" type="radio" class="form-check-input address_check" name="membershipRadios" id="membershipRadios1" value="{{i.address}}">
+                          {{i.address}}
+                      </label>
+                    </div>
+               </div>
+              {% endfor %}
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="cart_submit()">Buy Now</button>
+              </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+    <script>
+        {% for message in messages %}
+
+
+        var toastMixin = Swal.mixin({
+        toast: true,
+        icon: '{{message.tags}}',
+        title: 'General Title',
+        animation: false,
+        position: 'top-right',
+        showConfirmButton: false,
+        timer: 5000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+        });
+        toastMixin.fire({
+        animation: true,
+        title: "{{message}}"
+        });
+        {% endfor %}
+
+    </script>
+    {% endif %}
+
+<script>
+var checkboxValues = [];
+    function checkIfAnyChecked(checkbox_value) {
+    var checkboxValue = checkbox_value.value;
+    if (checkbox_value.checked) {
+        // Add the value to the array if it's not already present
+
+          checkboxValues.push(checkboxValue);
+
+      } else {
+       checkboxValues.pop(checkboxValue);
+
+      }
+
+      var checkboxes = document.querySelectorAll('.order_id');
+      var anyChecked = Array.from(checkboxes).some(function(checkbox) {
+        return checkbox.checked;
+      });
+      var my_button = document.getElementById('buy_now_button');
+      if (anyChecked) {
+         my_button.style.display = 'block';
+      } else {
+         my_button.style.display = 'none';
+      }
+    }
+
+
+
+  </script>
+<script>
+function cart_submit(){
+        var url ="buy-now";
+        var address = $("#address").val()
+            $.ajax({
+            url: url,
+            method: 'POST',
+            data: {
+              'address': address,
+              'checkboxValues': JSON.stringify(checkboxValues),
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function (data) {
+                status = data['status']
+                    message = data['message']
+                    if (status == "success"){
+                        document.getElementById('cart_form').submit();
+                    }
+                    else{
+                        var toastMixin = Swal.mixin({
+                        toast: true,
+                        icon: status,
+                        title: 'General Title',
+                        animation: false,
+                        position: 'top-right',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                        });
+                        toastMixin.fire({
+                        animation: true,
+                        title: message
+                        });
+                    }
+            }
+          });
+    }
+    </script>
+
+    <script>
+function add_address(address){
+$("#address").val(address)
+}
+    </script>
+
+<script>
+function uncheck_radio(){
+$('.address_check').prop('checked', false);
+}
+    </script>
+
+{% endblock %}

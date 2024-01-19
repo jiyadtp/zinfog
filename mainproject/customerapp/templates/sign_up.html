@@ -1,0 +1,178 @@
+<!doctype html>
+{% load static %}
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'sign_up/fonts/icomoon/style.css' %}">
+
+    <link rel="stylesheet" href="{% static 'sign_up/css/owl.carousel.min.css' %}">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'sign_up/css/bootstrap.min.css' %}">
+
+    <!-- Style -->
+    <link rel="stylesheet" href="{% static 'sign_up/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+
+    <title>Sign Up</title>
+  </head>
+  <style>
+    .toggle-password {
+        font-size: 0.8rem; /* Adjust the size as needed */
+    }
+</style>
+  <body>
+
+
+  <div class="half">
+    <div class="bg order-1 order-md-2" style="background-image: url('{% static 'sign_up/images/bg_1.jpg' %}');"></div>
+    <div class="contents order-2 order-md-1">
+
+      <div class="container">
+        <div class="row align-items-center justify-content-center">
+          <div class="col-md-6">
+            <div class="form-block">
+              <div class="text-center mb-5">
+              <h3><strong>Sign Up</strong></h3>
+              <!-- <p class="mb-4">Lorem ipsum dolor sit amet elit. Sapiente sit aut eos consectetur adipisicing.</p> -->
+              </div>
+              <form action="" method="post" id="register_form">
+                {% csrf_token %}
+                <div class="form-group first">
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <label for="name">Name</label>
+                      <input type="text" name="name" class="form-control" placeholder="your-name" id="name">
+                    </div>
+                    <div class="col-sm-6">
+                      <label for="email">Email</label>
+                      <input type="text" name="email" class="form-control" placeholder="your-email@gmail.com" id="email">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group last mb-3">
+                  <div class="row">
+                    <div class="col-sm-12">
+                      <label for="password">Password</label>
+<div class="input-group">
+        <input type="password" name="password" class="form-control" placeholder="Your Password" id="password">
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary toggle-password" type="button" onclick="togglePassword()">
+                <i class="fas fa-eye"></i>
+            </button>
+        </div>
+    </div>                   </div>
+                    <div class="col-sm-12">
+                      <label for="phone">Phone</label>
+                      <input type="text" name="phone" class="form-control number_input" placeholder="Your Phone Number" id="phone">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="d-sm-flex mb-5 align-items-center">
+<!--                  <label class="control control&#45;&#45;checkbox mb-3 mb-sm-0"><span class="caption">Remember me</span>-->
+<!--                    <input type="checkbox" checked="checked"/>-->
+<!--                    <div class="control__indicator"></div>-->
+<!--                  </label>-->
+                  <span class="ml-auto"><a style="color:#3b5998;" href="/" class="forgot-pass">Already Have an Account</a></span>
+                </div>
+
+                <input type="submit" value="Register" class="btn btn-block btn-primary" onclick="register_submit()">
+
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+
+
+
+    <script src="{% static 'sign_up/js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'sign_up/js/popper.min.js' %}"></script>
+    <script src="{% static 'sign_up/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'sign_up/js/main.js' %}"></script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        function register_submit(){
+            event.preventDefault()
+            var form_data = new FormData($('#register_form')[0]);
+            $.ajax({
+                type: 'POST',
+                url: "register-data",
+                data: form_data,
+                processData: false,
+                contentType: false,
+                success: function(data)
+                {
+                    status = data['status']
+                    message = data['message']
+
+                    if (status == "success"){
+                        document.getElementById('register_form').submit();
+                    }
+
+                    else{
+                        var toastMixin = Swal.mixin({
+                        toast: true,
+                        icon: status,
+                        title: 'General Title',
+                        animation: false,
+                        position: 'top-right',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.addEventListener('mouseenter', Swal.stopTimer)
+                            toast.addEventListener('mouseleave', Swal.resumeTimer)
+                        }
+                        });
+                        toastMixin.fire({
+                        animation: true,
+                        title: message
+                        });
+                    }
+
+                }
+            })
+
+        }
+    </script>
+
+<script>
+    function togglePassword() {
+        var passwordInput = document.getElementById("password");
+        var toggleButton = document.querySelector(".toggle-password");
+
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            toggleButton.innerHTML = '<i class="fas fa-eye-slash"></i>';
+        } else {
+            passwordInput.type = "password";
+            toggleButton.innerHTML = '<i class="fas fa-eye"></i>';
+        }
+    }
+</script>
+
+  <script>
+  var inputs = document.getElementsByClassName("number_input");
+  for (var i = 0; i < inputs.length; i++) {
+    inputs[i].addEventListener("input", function() {
+      this.value = this.value.replace(/[^0-9+]/g, ''); // Allow only numbers and "+"
+    });
+  }
+</script>
+
+  </body>
+</html>
